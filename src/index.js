@@ -22,6 +22,7 @@ const peerRouting = require('./peer-routing')
 const contentRouting = require('./content-routing')
 const dht = require('./dht')
 const pubsub = require('./pubsub')
+const introspection = require('libp2p-introspection')
 const getPeerInfo = require('./get-peer-info')
 const validateConfig = require('./config').validate
 
@@ -50,6 +51,7 @@ class Node extends EventEmitter {
     this.datastore = _options.datastore
     this.peerInfo = _options.peerInfo
     this.peerBook = _options.peerBook || new PeerBook()
+    this.introspection = introspection(this)
 
     this._modules = _options.modules
     this._config = _options.config
@@ -386,7 +388,9 @@ class Node extends EventEmitter {
                 d = D
               }
 
-              d.on('peer', (peerInfo) => this.emit('peer:discovery', peerInfo))
+              d.on('peer', (peerInfo) => {
+                this.emit('peer:discovery', peerInfo)
+              })
               this._discovery.push(d)
               d.start(_cb)
             } else {
