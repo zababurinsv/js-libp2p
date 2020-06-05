@@ -253,7 +253,7 @@ class Upgrader {
           return { stream: { ...muxedStream, ...stream }, protocol }
         } catch (err) {
           log.error('could not create new stream', err)
-          throw errCode(err, codes.ERR_UNSUPPORTED_PROTOCOL)
+          throw errCode(new Error('Could not create a new stream'), codes.ERR_UNSUPPORTED_PROTOCOL, { cause: err })
         }
       }
 

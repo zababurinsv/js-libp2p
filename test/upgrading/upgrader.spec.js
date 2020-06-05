@@ -339,6 +339,7 @@ describe('Upgrader', () => {
     results.forEach(result => {
       expect(result.isRejected).to.equal(true)
       expect(result.reason.code).to.equal(codes.ERR_UNSUPPORTED_PROTOCOL)
+      expect(result.reason.cause).to.exist()
     })
   })
 })
