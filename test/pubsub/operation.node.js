@@ -188,5 +188,48 @@ describe('Pubsub subsystem operates correctly', () => {
 
       await defer.promise
     })
+
+    it('should have unidirectional streams closed after messages sent', async function () {
+      this.timeout(10e3)
+      const defer = pDefer()
+      const libp2pId = libp2p.peerId.toB58String()
+      const topic = 'test-topic'
+      const data = 'hey!'
+
+      const conn = await libp2p.dial(remotePeerId)
+      remoteLibp2p.pubsub.start()
+
+      await Promise.all([
+        pWaitFor(() => libp2p.pubsub._pubsub.peers.size === 1),
+        pWaitFor(() => remoteLibp2p.pubsub._pubsub.peers.size === 1)
+      ])
+
+      // One inbound stream open from each peer to the other (each peer has 2)
+      expect(conn.streams.length).to.eql(2)
+      expect(remoteLibp2p.connectionManager.get(libp2p.peerId).streams.length).to.eql(2)
+
+      libp2p.pubsub.subscribe(topic, (msg) => {
+        expect(msg.data.toString()).to.equal(data)
+        defer.resolve()
+      })
+
+      // wait for remoteLibp2p to know about libp2p subscription
+      await pWaitFor(() => {
+        const subscribedPeers = remoteLibp2p.pubsub.getSubscribers(topic)
+        return subscribedPeers.includes(libp2pId)
+      })
+
+      // Open outbound streams to send message closed
+      expect(conn.streams.length).to.eql(2)
+      expect(remoteLibp2p.connectionManager.get(libp2p.peerId).streams.length).to.eql(2)
+
+      remoteLibp2p.pubsub.publish(topic, data)
+
+      await defer.promise
+
+      // Open outbound streams to send message closed
+      expect(conn.streams.length).to.eql(2)
+      expect(remoteLibp2p.connectionManager.get(libp2p.peerId).streams.length).to.eql(2)
+    })
   })
 })
