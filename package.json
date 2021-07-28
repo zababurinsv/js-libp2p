@@ -1,5 +1,5 @@
 {
-  "name": "libp2p",
+  "name": "@orbit/libp2p",
   "version": "0.32.1",
   "description": "JavaScript implementation of libp2p, a modular peer to peer network stack",
   "leadMaintainer": "Jacob Heun <jacobheun@gmail.com>",
