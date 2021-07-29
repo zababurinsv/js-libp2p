@@ -5,7 +5,7 @@ test/repo-tests*
 **/bundle.js
 .cache
 .parcel-cache
-
+.idea/
 # Logs
 logs
 *.log
